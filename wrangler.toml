@@ -1,4 +1,4 @@
-name = "wondr-rpc"
+name = "melonrpc"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 
@@ -14,5 +14,5 @@ bucket = "./public"
 # Custom domain (uncomment when ready)
 # [env.production]
 # routes = [
-#   { pattern = "rpc.wondr.build", custom_domain = true }
+#   { pattern = "melonrpc.click", custom_domain = true }
 # ]

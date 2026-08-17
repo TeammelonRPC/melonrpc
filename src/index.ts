@@ -1,5 +1,5 @@
 /**
- * Wondr RPC — Cloudflare Worker
+ * MelonRPC — Edge Worker
  * Solana JSON-RPC endpoint with rate limiting and method allowlist.
  */
 
