@@ -1,6 +1,6 @@
 # 🍈 MelonRPC
 
-Open-source Solana RPC infrastructure built on Cloudflare Workers.
+Open-source Solana RPC infrastructure.
 
 **Live:** [melonrpc.click](https://melonrpc.click)
 
@@ -45,19 +45,18 @@ curl https://melonrpc.click -X POST \
 
 ## Tech Stack
 
-- **Runtime:** Cloudflare Workers
-- **Rate Limiting:** Cloudflare KV
-- **Frontend:** Static HTML/CSS/JS (landing page built with Next.js)
-- **RPC:** Standard Solana JSON-RPC proxy with method allowlist
+- **Runtime:** Edge Workers
+- **Rate Limiting:** KV Store
+- **Frontend:** Static HTML/CSS/JS + Next.js landing page
+- **RPC:** Standard Solana JSON-RPC with method allowlist
 
 ## Self-Hosting
 
 1. Clone this repo
 2. Install dependencies: `npm install`
-3. Create a KV namespace: `npx wrangler kv:namespace create RATE_LIMIT`
-4. Update the KV ID in `wrangler.toml`
-5. Set your RPC provider key: `npx wrangler secret put UPSTREAM_KEY`
-6. Deploy: `npm run deploy`
+3. Set up your rate limiting store
+4. Set your RPC provider key as an environment secret
+5. Deploy to your preferred edge platform
 
 ## Project Structure
 
