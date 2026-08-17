@@ -1,0 +1,527 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MelonRPC â€” Documentation</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Assistant:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#030305;
+  --foreground:#ffffff;
+  --muted:#a0a0a0;
+  --accent-warm:#ffa091;
+  --accent-cool:#8da9fc;
+  --surface-glass:rgba(255,255,255,0.04);
+  --surface-glass-hover:rgba(255,255,255,0.08);
+  --border-glass:rgba(255,255,255,0.08);
+  --border-glass-strong:rgba(255,255,255,0.15);
+  --green:#10b981;
+}
+body{background:var(--bg);color:var(--foreground);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-size:16px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;cursor:pointer}
+.container{max-width:80rem;margin:0 auto;padding:0 1.5rem}
+@media(min-width:1024px){.container{padding:0 2rem}}
+
+/* Aurora background */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:0.18}
+.aurora::before,.aurora::after{content:'';position:absolute;border-radius:50%;filter:blur(120px);animation:aurora-breathe 12s ease-in-out infinite alternate}
+.aurora::before{width:600px;height:600px;top:-200px;left:-150px;background:radial-gradient(circle,var(--accent-warm),transparent 70%)}
+.aurora::after{width:700px;height:700px;bottom:-250px;right:-200px;background:radial-gradient(circle,var(--accent-cool),transparent 70%);animation-delay:-6s}
+@keyframes aurora-breathe{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  50%{transform:translate(30px,20px) scale(1.1);opacity:0.7}
+  100%{transform:translate(-20px,-10px) scale(0.95);opacity:1}
+}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(3,3,5,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:.75rem 0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Inter',sans-serif;font-weight:700;font-size:1.1rem;color:var(--foreground);letter-spacing:-0.02em}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--foreground)}
+.nav-cta{display:flex;align-items:center;gap:.75rem}
+.btn-x{display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;border-radius:9999px;border:1px solid var(--border-glass-strong);background:transparent;color:var(--muted);transition:all .2s}
+.btn-x:hover{border-color:var(--foreground);color:var(--foreground)}
+.btn-primary{
+  position:relative;display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--surface-glass);color:var(--foreground);
+  font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;
+  padding:.625rem 1.5rem;border-radius:9999px;border:none;
+  transition:all .2s;overflow:hidden;z-index:1;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:-1px;border-radius:9999px;
+  padding:1px;
+  background:linear-gradient(135deg,var(--accent-warm),var(--accent-cool),var(--accent-warm));
+  background-size:200% 200%;
+  animation:gradient-spin 4s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  z-index:-1;
+}
+@keyframes gradient-spin{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.btn-primary:hover{background:var(--surface-glass-hover);transform:translateY(-1px);box-shadow:0 4px 24px rgba(255,160,145,0.1),0 4px 24px rgba(141,169,252,0.1)}
+
+/* Docs Layout */
+.docs-layout{position:relative;z-index:1;display:grid;grid-template-columns:240px 1fr;gap:0;max-width:80rem;margin:0 auto;padding:5rem 0 0;min-height:100vh}
+
+/* Sidebar */
+.sidebar{position:sticky;top:5rem;align-self:start;border-right:1px solid var(--border-glass);padding:2rem 1.25rem;max-height:calc(100vh - 5rem);overflow-y:auto;background:var(--surface-glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sidebar .s-group{font-family:'Assistant',sans-serif;font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:1.5rem;margin-bottom:.5rem;padding-left:1rem;opacity:.6}
+.sidebar .s-group:first-child{margin-top:0}
+.sidebar a{display:block;font-family:'Inter',sans-serif;font-size:.8125rem;font-weight:500;color:var(--muted);padding:.5rem 1rem;border-left:2px solid transparent;border-radius:0;transition:all .2s}
+.sidebar a:hover{color:var(--foreground);border-left-color:var(--border-glass-strong)}
+.sidebar a.active{color:var(--accent-warm);border-left-color:var(--accent-warm);font-weight:600}
+
+/* Main content */
+.docs-main{padding:2.5rem 3rem 4rem}
+.docs-main h1{font-family:'Assistant','Inter',sans-serif;font-size:2.25rem;font-weight:600;letter-spacing:-.03em;color:var(--foreground);margin-bottom:.25rem}
+.docs-main .subtitle{font-size:.9375rem;color:var(--muted);margin-bottom:3rem}
+.docs-main h2{font-family:'Assistant','Inter',sans-serif;font-size:1.5rem;font-weight:600;letter-spacing:-.02em;margin:3.5rem 0 1rem;padding-top:2rem;border-top:1px solid var(--border-glass);color:var(--foreground)}
+.docs-main h2:first-of-type{border-top:none;margin-top:0;padding-top:0}
+.docs-main h3{font-family:'Inter',sans-serif;font-size:.8125rem;font-weight:600;color:var(--muted);margin:1.75rem 0 .75rem;text-transform:uppercase;letter-spacing:.06em}
+.docs-main p{font-size:.9375rem;color:var(--muted);line-height:1.8;margin-bottom:1rem;max-width:700px}
+.docs-main ul{font-size:.9375rem;color:var(--muted);line-height:2;margin-bottom:1rem;padding-left:1.25rem}
+.docs-main code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.8125rem;background:var(--surface-glass);padding:.15rem .5rem;border-radius:.375rem;color:var(--accent-warm);border:1px solid var(--border-glass)}
+
+/* Code blocks */
+.code-block{background:#000000;border:1px solid var(--border-glass);border-radius:1rem;padding:1.75rem 2rem;margin:1rem 0 2rem;overflow-x:auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.code-block pre{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.8rem;line-height:1.9;color:var(--muted);white-space:pre}
+.code-block .c-hl{color:#ffffff}
+.code-block .c-acc{color:#10b981}
+.code-block .c-key{color:#ffa091}
+.code-block .c-cmt{color:#525252}
+
+/* Method cards */
+.method-card{background:var(--surface-glass);border:1px solid var(--border-glass);border-radius:1rem;padding:1.25rem 1.75rem;margin:1rem 0;transition:all .2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.method-card:hover{border-color:var(--border-glass-strong)}
+.method-name{font-family:'Inter',sans-serif;font-size:.9375rem;font-weight:600;color:var(--foreground);margin-bottom:.375rem}
+.method-name code{font-size:.8125rem;color:var(--foreground);background:none;border:none;padding:0}
+.method-desc{font-size:.875rem;color:var(--muted);line-height:1.6}
+
+/* Pills */
+.pill{display:inline-block;font-family:'Inter',sans-serif;font-size:.6875rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:.2rem .625rem;background:var(--surface-glass);border:1px solid var(--border-glass);color:var(--accent-warm);border-radius:9999px;margin-left:.5rem;vertical-align:middle}
+
+/* Footer */
+footer{position:relative;z-index:1;border-top:1px solid var(--border-glass);padding:2rem 0;background:rgba(3,3,5,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.footer-inner{display:flex;align-items:center;justify-content:space-between}
+.footer-brand{font-family:'Inter',sans-serif;font-weight:700;font-size:1rem;color:var(--foreground);letter-spacing:-0.02em}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted);font-weight:500;transition:color .2s}
+.footer-links a:hover{color:var(--foreground)}
+.footer-copy{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+
+/* Mobile */
+@media(max-width:1023px){
+  .nav-links{display:none}
+  .docs-layout{grid-template-columns:1fr;padding-top:5rem}
+  .sidebar{position:static;display:flex;flex-wrap:wrap;gap:.375rem;max-height:none;margin-bottom:0;border-right:none;border-bottom:1px solid var(--border-glass);padding:1rem 1.25rem}
+  .sidebar a{border-left:none;padding:.375rem .875rem;border:1px solid var(--border-glass);border-radius:9999px;font-size:.75rem}
+  .sidebar a.active{border-color:var(--accent-warm);color:var(--accent-warm);background:rgba(255,160,145,0.08)}
+  .sidebar .s-group{width:100%;margin-top:1rem;padding-left:0}
+  .sidebar .s-group:first-child{margin-top:0}
+  .docs-main{padding:1.5rem 1.25rem 3rem}
+  .docs-main h1{font-size:1.75rem}
+  .footer-inner{flex-direction:column;gap:1.5rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora background -->
+<div class="aurora"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="container nav-inner">
+    <a href="/" class="logo">MelonRPC</a>
+    <nav class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/documentation" class="active">Docs</a>
+      <a href="/playground">Playground</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="https://x.com/MelonRpc" target="_blank" class="btn-x" aria-label="X/Twitter">
+        <svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="/playground" class="btn-primary">Try RPC <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<!-- DOCS LAYOUT -->
+<div class="docs-layout">
+  <aside class="sidebar">
+    <div class="s-group">Getting Started</div>
+    <a href="#getting-started" class="active">Introduction</a>
+    <a href="#quick-start">Quick Start</a>
+    <div class="s-group">Methods</div>
+    <a href="#getBalance">getBalance</a>
+    <a href="#getAccountInfo">getAccountInfo</a>
+    <a href="#getSlot">getSlot</a>
+    <a href="#getBlockHeight">getBlockHeight</a>
+    <a href="#getTokenAccountsByOwner">getTokenAccountsByOwner</a>
+    <a href="#getSignaturesForAddress">getSignaturesForAddress</a>
+    <a href="#sendTransaction">sendTransaction</a>
+    <div class="s-group">WebSockets</div>
+    <a href="#accountSubscribe">accountSubscribe</a>
+    <a href="#slotSubscribe">slotSubscribe</a>
+    <div class="s-group">Reference</div>
+    <a href="#errors">Error Codes</a>
+  </aside>
+
+  <main class="docs-main">
+    <h1>Documentation</h1>
+    <p class="subtitle">Everything you need to integrate MelonRPC into your Solana app.</p>
+
+    <!-- GETTING STARTED -->
+    <h2 id="getting-started">Getting Started</h2>
+    <p>MelonRPC is a standard Solana JSON-RPC endpoint. Replace your existing RPC URL with <code>https://melonrpc.click</code> and you're live. Compatible with all major SDKs including <code>@solana/web3.js</code>, Anchor, and solana-py.</p>
+    <p>No API key required during beta â€” just swap the URL and start building.</p>
+
+    <h3 id="quick-start">Quick Start</h3>
+    <div class="code-block">
+<pre><span class="c-cmt">// JavaScript / TypeScript</span>
+<span class="c-hl">import</span> { Connection } <span class="c-hl">from</span> <span class="c-acc">'@solana/web3.js'</span>
+
+<span class="c-hl">const</span> connection = <span class="c-hl">new</span> Connection(<span class="c-acc">'https://melonrpc.click'</span>, {
+  wsEndpoint: <span class="c-acc">'wss://melonrpc.click'</span>,
+  commitment: <span class="c-acc">'confirmed'</span>
+})
+
+<span class="c-hl">const</span> balance = <span class="c-hl">await</span> connection.getBalance(publicKey)</pre>
+    </div>
+
+    <div class="code-block">
+<pre><span class="c-cmt"># cURL</span>
+<span class="c-hl">curl</span> https://melonrpc.click -X POST \
+  -H <span class="c-acc">"Content-Type: application/json"</span> \
+  -d <span class="c-acc">'{"jsonrpc":"2.0","id":1,"method":"getSlot"}'</span></pre>
+    </div>
+
+    <p>MelonRPC supports all standard Solana JSON-RPC methods. Requests are standard <code>POST</code> with <code>Content-Type: application/json</code>. Batch requests are also supported.</p>
+
+    <!-- METHODS -->
+    <h2 id="getBalance">getBalance</h2>
+    <p>Returns the lamport balance of the account at the given public key.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getBalance"</span>,
+  <span class="c-acc">"params"</span>: [<span class="c-acc">"vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</span>]
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: {
+    <span class="c-acc">"context"</span>: { <span class="c-acc">"slot"</span>: 123456789 },
+    <span class="c-acc">"value"</span>: 1000000000
+  }
+}</pre>
+    </div>
+
+    <h2 id="getAccountInfo">getAccountInfo</h2>
+    <p>Returns all account information for the given public key, including lamports, owner, data, and executable status.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getAccountInfo"</span>,
+  <span class="c-acc">"params"</span>: [
+    <span class="c-acc">"vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</span>,
+    { <span class="c-acc">"encoding"</span>: <span class="c-acc">"base64"</span> }
+  ]
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: {
+    <span class="c-acc">"context"</span>: { <span class="c-acc">"slot"</span>: 123456789 },
+    <span class="c-acc">"value"</span>: {
+      <span class="c-acc">"data"</span>: [<span class="c-acc">""</span>, <span class="c-acc">"base64"</span>],
+      <span class="c-acc">"executable"</span>: <span class="c-hl">false</span>,
+      <span class="c-acc">"lamports"</span>: 1000000000,
+      <span class="c-acc">"owner"</span>: <span class="c-acc">"11111111111111111111111111111111"</span>,
+      <span class="c-acc">"rentEpoch"</span>: 350
+    }
+  }
+}</pre>
+    </div>
+
+    <h2 id="getSlot">getSlot</h2>
+    <p>Returns the slot that has reached the given or default commitment level.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getSlot"</span>
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: 286413215
+}</pre>
+    </div>
+
+    <h2 id="getBlockHeight">getBlockHeight</h2>
+    <p>Returns the current block height of the node.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getBlockHeight"</span>
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: 263850012
+}</pre>
+    </div>
+
+    <h2 id="getTokenAccountsByOwner">getTokenAccountsByOwner</h2>
+    <p>Returns all SPL token accounts for a given owner public key, filtered by mint or program ID.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getTokenAccountsByOwner"</span>,
+  <span class="c-acc">"params"</span>: [
+    <span class="c-acc">"vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</span>,
+    { <span class="c-acc">"programId"</span>: <span class="c-acc">"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"</span> },
+    { <span class="c-acc">"encoding"</span>: <span class="c-acc">"jsonParsed"</span> }
+  ]
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: {
+    <span class="c-acc">"context"</span>: { <span class="c-acc">"slot"</span>: 123456789 },
+    <span class="c-acc">"value"</span>: [
+      {
+        <span class="c-acc">"pubkey"</span>: <span class="c-acc">"..."</span>,
+        <span class="c-acc">"account"</span>: { <span class="c-acc">"lamports"</span>: 2039280, <span class="c-acc">"data"</span>: { ... } }
+      }
+    ]
+  }
+}</pre>
+    </div>
+
+    <h2 id="getSignaturesForAddress">getSignaturesForAddress</h2>
+    <p>Returns confirmed signatures for transactions involving an address. Returns newest first, paginated by <code>before</code>/<code>until</code> signatures.</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"getSignaturesForAddress"</span>,
+  <span class="c-acc">"params"</span>: [
+    <span class="c-acc">"vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</span>,
+    { <span class="c-acc">"limit"</span>: 5 }
+  ]
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: [
+    {
+      <span class="c-acc">"signature"</span>: <span class="c-acc">"5K4s..."</span>,
+      <span class="c-acc">"slot"</span>: 286413000,
+      <span class="c-acc">"err"</span>: <span class="c-hl">null</span>,
+      <span class="c-acc">"blockTime"</span>: 1700000000
+    }
+  ]
+}</pre>
+    </div>
+
+    <h2 id="sendTransaction">sendTransaction<span class="pill">write</span></h2>
+    <p>Submits a signed transaction to the cluster for processing. The transaction must be fully signed and serialized (base64 or base58).</p>
+    <h3>Request</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"sendTransaction"</span>,
+  <span class="c-acc">"params"</span>: [
+    <span class="c-acc">"&lt;base64-encoded-transaction&gt;"</span>,
+    { <span class="c-acc">"encoding"</span>: <span class="c-acc">"base64"</span> }
+  ]
+}</pre>
+    </div>
+    <h3>Response</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"result"</span>: <span class="c-acc">"2id3YC2jK9G5Wo2phDx4gJVAew8DcY5NAojnVuao8rkxwPYPe8..."</span>
+}</pre>
+    </div>
+
+    <!-- WEBSOCKETS -->
+    <h2 id="accountSubscribe">accountSubscribe<span class="pill">websocket</span></h2>
+    <p>Subscribe to an account to receive notifications when the account's lamports or data changes. Connect via <code>wss://melonrpc.click</code>.</p>
+    <p>Standard WebSocket subscriptions are available on the free tier. Enhanced WebSocket methods require the Growth plan ($49/mo).</p>
+    <h3>Subscribe</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"accountSubscribe"</span>,
+  <span class="c-acc">"params"</span>: [
+    <span class="c-acc">"vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</span>,
+    { <span class="c-acc">"encoding"</span>: <span class="c-acc">"base64"</span>, <span class="c-acc">"commitment"</span>: <span class="c-acc">"confirmed"</span> }
+  ]
+}</pre>
+    </div>
+    <h3>Notification</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"accountNotification"</span>,
+  <span class="c-acc">"params"</span>: {
+    <span class="c-acc">"subscription"</span>: 1,
+    <span class="c-acc">"result"</span>: {
+      <span class="c-acc">"context"</span>: { <span class="c-acc">"slot"</span>: 286413300 },
+      <span class="c-acc">"value"</span>: { <span class="c-acc">"lamports"</span>: 500000000, <span class="c-acc">"data"</span>: [<span class="c-acc">""</span>, <span class="c-acc">"base64"</span>] }
+    }
+  }
+}</pre>
+    </div>
+
+    <h2 id="slotSubscribe">slotSubscribe<span class="pill">websocket</span></h2>
+    <p>Subscribe to receive notification any time a slot is processed by the validator.</p>
+    <h3>Subscribe</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"slotSubscribe"</span>
+}</pre>
+    </div>
+    <h3>Notification</h3>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"method"</span>: <span class="c-acc">"slotNotification"</span>,
+  <span class="c-acc">"params"</span>: {
+    <span class="c-acc">"subscription"</span>: 0,
+    <span class="c-acc">"result"</span>: { <span class="c-acc">"slot"</span>: 286413400, <span class="c-acc">"parent"</span>: 286413399, <span class="c-acc">"root"</span>: 286413370 }
+  }
+}</pre>
+    </div>
+
+    <!-- ERROR CODES -->
+    <h2 id="errors">Error Codes</h2>
+    <p>MelonRPC returns standard JSON-RPC error codes. All errors follow this shape:</p>
+    <div class="code-block">
+<pre>{
+  <span class="c-acc">"jsonrpc"</span>: <span class="c-acc">"2.0"</span>,
+  <span class="c-acc">"id"</span>: 1,
+  <span class="c-acc">"error"</span>: {
+    <span class="c-acc">"code"</span>: -32600,
+    <span class="c-acc">"message"</span>: <span class="c-acc">"Invalid request"</span>
+  }
+}</pre>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32700</code> â€” Parse Error</div>
+      <p class="method-desc">Invalid JSON was received.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32600</code> â€” Invalid Request</div>
+      <p class="method-desc">The JSON sent is not a valid JSON-RPC request.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32601</code> â€” Method Not Found / Not Allowed</div>
+      <p class="method-desc">The method does not exist or is not in the allowlist.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32602</code> â€” Invalid Params</div>
+      <p class="method-desc">Invalid method parameters.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32603</code> â€” Internal Error</div>
+      <p class="method-desc">Internal JSON-RPC error.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>-32000</code> â€” Rate Limited</div>
+      <p class="method-desc">Too many requests from your IP. Wait and retry.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-name"><code>429</code> â€” HTTP Too Many Requests</div>
+      <p class="method-desc">Monthly credit limit exceeded. Upgrade to increase your allocation.</p>
+    </div>
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-brand">MelonRPC</div>
+    <div class="footer-links">
+      <a href="/documentation">Docs</a>
+      <a href="/playground">Playground</a>
+      <a href="https://x.com/MelonRpc" target="_blank">X</a>
+    </div>
+    <div class="footer-copy">&copy; 2026 MelonRPC</div>
+  </div>
+</footer>
+
+<script>
+// Active sidebar link tracking on scroll
+const sections = document.querySelectorAll('h2[id], h3[id]');
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+function updateActive() {
+  let current = '';
+  sections.forEach(section => {
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= 120) current = section.id;
+  });
+  sidebarLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+}
+
+window.addEventListener('scroll', updateActive, { passive: true });
+updateActive();
+</script>
+</body>
+</html>
