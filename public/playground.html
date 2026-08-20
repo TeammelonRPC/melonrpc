@@ -1,0 +1,410 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MelonRPC â€” Playground</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Assistant:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#030305;
+  --foreground:#ffffff;
+  --muted:#a0a0a0;
+  --accent-warm:#ffa091;
+  --accent-cool:#8da9fc;
+  --surface-glass:rgba(255,255,255,0.04);
+  --surface-glass-hover:rgba(255,255,255,0.08);
+  --border-glass:rgba(255,255,255,0.08);
+  --border-glass-strong:rgba(255,255,255,0.15);
+  --green:#10b981;
+}
+body{background:var(--bg);color:var(--foreground);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-size:16px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;cursor:pointer}
+.container{max-width:80rem;margin:0 auto;padding:0 1.5rem}
+@media(min-width:1024px){.container{padding:0 2rem}}
+
+/* Aurora background */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:0.18}
+.aurora::before,.aurora::after{content:'';position:absolute;border-radius:50%;filter:blur(120px);animation:aurora-breathe 12s ease-in-out infinite alternate}
+.aurora::before{width:600px;height:600px;top:-200px;left:-150px;background:radial-gradient(circle,var(--accent-warm),transparent 70%)}
+.aurora::after{width:700px;height:700px;bottom:-250px;right:-200px;background:radial-gradient(circle,var(--accent-cool),transparent 70%);animation-delay:-6s}
+@keyframes aurora-breathe{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  50%{transform:translate(30px,20px) scale(1.1);opacity:0.7}
+  100%{transform:translate(-20px,-10px) scale(0.95);opacity:1}
+}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(3,3,5,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-glass);padding:.75rem 0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Inter',sans-serif;font-weight:700;font-size:1.1rem;color:var(--foreground);letter-spacing:-0.02em}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;color:var(--muted);transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--foreground)}
+.nav-cta{display:flex;align-items:center;gap:.75rem}
+.btn-x{display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;border-radius:9999px;border:1px solid var(--border-glass-strong);background:transparent;color:var(--muted);transition:all .2s}
+.btn-x:hover{border-color:var(--foreground);color:var(--foreground)}
+.btn-primary{
+  position:relative;display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--surface-glass);color:var(--foreground);
+  font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;
+  padding:.625rem 1.5rem;border-radius:9999px;border:none;
+  transition:all .2s;overflow:hidden;z-index:1;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:-1px;border-radius:9999px;
+  padding:1px;
+  background:linear-gradient(135deg,var(--accent-warm),var(--accent-cool),var(--accent-warm));
+  background-size:200% 200%;
+  animation:gradient-spin 4s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  z-index:-1;
+}
+@keyframes gradient-spin{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.btn-primary:hover{background:var(--surface-glass-hover);transform:translateY(-1px);box-shadow:0 4px 24px rgba(255,160,145,0.1),0 4px 24px rgba(141,169,252,0.1)}
+
+/* Playground Layout */
+.pg-layout{position:relative;z-index:1;display:grid;grid-template-columns:260px 1fr;gap:0;max-width:80rem;margin:0 auto;padding:5rem 0 0;min-height:100vh}
+.pg-sidebar{border-right:1px solid var(--border-glass);padding:2rem 1.25rem;display:flex;flex-direction:column;gap:.25rem}
+.pg-sidebar .s-group{font-family:'Assistant',sans-serif;font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:1.25rem;margin-bottom:.5rem;opacity:.6}
+.pg-sidebar button{
+  display:block;width:100%;text-align:left;
+  background:var(--surface-glass);
+  border:1px solid var(--border-glass);
+  font-family:'Inter',sans-serif;font-size:.8125rem;font-weight:500;color:var(--muted);
+  padding:.7rem 1rem;border-radius:12px;transition:all .2s;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.pg-sidebar button:hover{background:var(--surface-glass-hover);color:var(--foreground);border-color:var(--border-glass-strong)}
+.pg-sidebar button.active{
+  background:linear-gradient(135deg,rgba(255,160,145,0.12),rgba(141,169,252,0.12));
+  border-color:rgba(255,255,255,0.15);color:var(--foreground);font-weight:600;
+}
+
+.pg-main{padding:2.5rem 3rem}
+.pg-title{font-family:'Assistant','Inter',sans-serif;font-size:2.25rem;font-weight:600;letter-spacing:-.03em;color:var(--foreground);margin-bottom:.25rem}
+.pg-subtitle{font-family:'Inter',sans-serif;font-size:.9rem;color:var(--muted);margin-bottom:2rem}
+
+/* Status indicator */
+.status-bar{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green),0 0 16px rgba(16,185,129,0.3);animation:pulse 2s ease-in-out infinite}
+.status-label{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted);font-weight:500}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.9)}}
+
+/* Input area */
+.pg-input-row{display:flex;gap:.75rem;margin-bottom:1.5rem;align-items:stretch}
+.pg-input{
+  flex:1;padding:.875rem 1.25rem;
+  border:1px solid var(--border-glass);
+  background:var(--surface-glass);color:var(--foreground);
+  font-family:'Inter',sans-serif;font-size:.875rem;border-radius:1rem;outline:none;
+  transition:all .2s;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.pg-input::placeholder{color:var(--muted);opacity:.5}
+.pg-input:focus{border-color:var(--border-glass-strong);box-shadow:0 0 0 3px rgba(141,169,252,.08)}
+.pg-run{
+  position:relative;padding:.875rem 2rem;
+  background:var(--surface-glass);color:var(--foreground);
+  border:none;border-radius:9999px;
+  font-family:'Inter',sans-serif;font-size:.875rem;font-weight:500;
+  white-space:nowrap;transition:all .2s;overflow:hidden;z-index:1;
+}
+.pg-run::before{
+  content:'';position:absolute;inset:-1px;border-radius:9999px;
+  padding:1px;
+  background:linear-gradient(135deg,var(--accent-warm),var(--accent-cool),var(--accent-warm));
+  background-size:200% 200%;animation:gradient-spin 4s linear infinite;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;z-index:-1;
+}
+.pg-run:hover{background:var(--surface-glass-hover);transform:translateY(-1px);box-shadow:0 4px 24px rgba(255,160,145,0.08),0 4px 24px rgba(141,169,252,0.08)}
+.pg-run:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Result */
+.pg-result{margin-top:1.5rem}
+.pg-timing{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted);margin-bottom:.75rem}
+.pg-timing span{color:var(--foreground);font-weight:600}
+.pg-json{
+  background:#000000;border:1px solid var(--border-glass);border-radius:1rem;padding:1.75rem 2rem;
+  overflow-x:auto;max-height:420px;overflow-y:auto;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.pg-json pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;font-size:.8rem;
+  line-height:1.8;color:var(--muted);white-space:pre-wrap;word-break:break-all;
+}
+.pg-json .j-key{color:#ffa091}
+.pg-json .j-str{color:#8da9fc}
+.pg-json .j-num{color:#ffffff}
+.pg-json .j-bool{color:#10b981}
+.pg-json .j-null{color:#525252}
+
+/* cURL box */
+.pg-curl{margin-top:1.75rem}
+.pg-curl-label{font-family:'Assistant',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.5rem;opacity:.6}
+.pg-curl-box{
+  background:#000000;border:1px solid var(--border-glass);border-radius:1rem;padding:1.5rem 1.75rem;
+  overflow-x:auto;
+}
+.pg-curl-box pre{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.8rem;line-height:1.8;color:var(--muted)}
+.pg-curl-box .c-acc{color:#ffa091}
+.pg-curl-box .c-hl{color:#ffffff}
+
+/* Error */
+.pg-error{border:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.06);border-radius:1rem;padding:1.25rem 1.75rem;color:#f87171;font-family:'Inter',sans-serif;font-size:.875rem;line-height:1.6;backdrop-filter:blur(8px)}
+
+/* Footer */
+footer{position:relative;z-index:1;border-top:1px solid var(--border-glass);padding:2rem 0;background:rgba(3,3,5,0.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.footer-inner{display:flex;align-items:center;justify-content:space-between}
+.footer-brand{font-family:'Inter',sans-serif;font-weight:700;font-size:1rem;color:var(--foreground);letter-spacing:-0.02em}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted);font-weight:500;transition:color .2s}
+.footer-links a:hover{color:var(--foreground)}
+.footer-copy{font-family:'Inter',sans-serif;font-size:.8125rem;color:var(--muted)}
+
+/* Scrollbar styling */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.2)}
+
+@media(max-width:1023px){
+  .nav-links{display:none}
+  .pg-layout{grid-template-columns:1fr;padding-top:5rem}
+  .pg-sidebar{border-right:none;border-bottom:1px solid var(--border-glass);flex-direction:row;flex-wrap:wrap;padding:1rem 1.25rem;gap:.375rem}
+  .pg-sidebar .s-group{width:100%}
+  .pg-sidebar button{width:auto}
+  .pg-main{padding:1.5rem 1.25rem}
+  .pg-input-row{flex-direction:column}
+  .footer-inner{flex-direction:column;gap:1.5rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora background -->
+<div class="aurora"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="container nav-inner">
+    <a href="/" class="logo">MelonRPC</a>
+    <nav class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/documentation">Docs</a>
+      <a href="/playground" class="active">Playground</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="https://x.com/MelonRpc" target="_blank" class="btn-x" aria-label="X/Twitter">
+        <svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="/playground" class="btn-primary">Try RPC <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<!-- PLAYGROUND LAYOUT -->
+<div class="pg-layout">
+  <aside class="pg-sidebar">
+    <div class="s-group">Queries</div>
+    <button class="active" data-method="getBalance">Get Balance</button>
+    <button data-method="getAccountInfo">Get Account Info</button>
+    <button data-method="getSlot">Get Slot</button>
+    <button data-method="getBlockHeight">Get Block Height</button>
+    <button data-method="getTokenAccountsByOwner">Get Token Accounts</button>
+    <button data-method="getSignaturesForAddress">Get Signatures</button>
+  </aside>
+
+  <main class="pg-main">
+    <h1 class="pg-title">Playground</h1>
+    <p class="pg-subtitle">Run real queries against Solana mainnet via MelonRPC</p>
+
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span class="status-label">Connected to Mainnet</span>
+    </div>
+
+    <div class="pg-input-row">
+      <input class="pg-input" id="pg-address" type="text"
+        placeholder="Solana address (public key)"
+        value="vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"/>
+      <button class="pg-run" id="pg-run-btn">Run query</button>
+    </div>
+
+    <div class="pg-result" id="pg-result" style="display:none">
+      <div class="pg-timing" id="pg-timing"></div>
+      <div class="pg-json" id="pg-json"><pre></pre></div>
+    </div>
+
+    <div class="pg-error" id="pg-error" style="display:none"></div>
+
+    <div class="pg-curl" id="pg-curl" style="display:none">
+      <div class="pg-curl-label">cURL Example</div>
+      <div class="pg-curl-box"><pre id="pg-curl-code"></pre></div>
+    </div>
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-brand">MelonRPC</div>
+    <div class="footer-links">
+      <a href="/documentation">Docs</a>
+      <a href="/playground">Playground</a>
+      <a href="https://x.com/MelonRpc" target="_blank">X</a>
+    </div>
+    <div class="footer-copy">&copy; 2026 MelonRPC</div>
+  </div>
+</footer>
+
+<script>
+const RPC_URL = window.location.origin;
+const DEFAULT_ADDR = 'vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg';
+
+const METHODS = {
+  getBalance: {
+    needsAddress: true,
+    buildParams: (addr) => [addr],
+    label: 'Get Balance',
+  },
+  getAccountInfo: {
+    needsAddress: true,
+    buildParams: (addr) => [addr, { encoding: 'base64' }],
+    label: 'Get Account Info',
+  },
+  getSlot: {
+    needsAddress: false,
+    buildParams: () => [],
+    label: 'Get Slot',
+  },
+  getBlockHeight: {
+    needsAddress: false,
+    buildParams: () => [],
+    label: 'Get Block Height',
+  },
+  getTokenAccountsByOwner: {
+    needsAddress: true,
+    buildParams: (addr) => [
+      addr,
+      { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
+      { encoding: 'jsonParsed' }
+    ],
+    label: 'Get Token Accounts',
+  },
+  getSignaturesForAddress: {
+    needsAddress: true,
+    buildParams: (addr) => [addr, { limit: 5 }],
+    label: 'Get Signatures',
+  },
+};
+
+let currentMethod = 'getBalance';
+
+// Sidebar buttons
+document.querySelectorAll('.pg-sidebar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pg-sidebar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMethod = btn.dataset.method;
+    const m = METHODS[currentMethod];
+    const input = document.getElementById('pg-address');
+    if (m.needsAddress) {
+      input.style.display = '';
+      input.placeholder = 'Solana address (public key)';
+    } else {
+      input.style.display = 'none';
+    }
+  });
+});
+
+// Run query
+document.getElementById('pg-run-btn').addEventListener('click', runQuery);
+document.getElementById('pg-address').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') runQuery();
+});
+
+async function runQuery() {
+  const btn = document.getElementById('pg-run-btn');
+  const resultEl = document.getElementById('pg-result');
+  const errorEl = document.getElementById('pg-error');
+  const curlEl = document.getElementById('pg-curl');
+  const timingEl = document.getElementById('pg-timing');
+  const jsonEl = document.getElementById('pg-json').querySelector('pre');
+  const curlCode = document.getElementById('pg-curl-code');
+
+  // Reset
+  resultEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  curlEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+
+  const m = METHODS[currentMethod];
+  const addr = document.getElementById('pg-address').value.trim() || DEFAULT_ADDR;
+  const params = m.needsAddress ? m.buildParams(addr) : m.buildParams();
+
+  const body = {
+    jsonrpc: '2.0',
+    id: 1,
+    method: currentMethod,
+    params: params,
+  };
+
+  // Show cURL
+  const curlStr = `curl ${RPC_URL} -X POST \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(body)}'`;
+  curlCode.innerHTML = highlightCurl(curlStr);
+  curlEl.style.display = '';
+
+  try {
+    const start = performance.now();
+    const resp = await fetch(RPC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const elapsed = Math.round(performance.now() - start);
+    const data = await resp.json();
+
+    if (data.error) {
+      errorEl.textContent = `Error ${data.error.code}: ${data.error.message}`;
+      errorEl.style.display = '';
+    } else {
+      timingEl.innerHTML = `Response time: <span>${elapsed}ms</span>`;
+      jsonEl.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+      resultEl.style.display = '';
+    }
+  } catch (err) {
+    errorEl.textContent = `Network error: ${err.message}. Check your connection and try again.`;
+    errorEl.style.display = '';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Run query';
+}
+
+function syntaxHighlight(json) {
+  return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"([^"]+)":/g, '<span class="j-key">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span class="j-str">"$1"</span>')
+    .replace(/: (\d+\.?\d*)/g, ': <span class="j-num">$1</span>')
+    .replace(/: (true|false)/g, ': <span class="j-bool">$1</span>')
+    .replace(/: (null)/g, ': <span class="j-null">$1</span>');
+}
+
+function highlightCurl(str) {
+  return str
+    .replace(/curl/g, '<span class="c-hl">curl</span>')
+    .replace(/"([^"]*)"/g, '<span class="c-acc">"$1"</span>');
+}
+</script>
+</body>
+</html>
