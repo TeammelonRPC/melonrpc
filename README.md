@@ -1,4 +1,8 @@
-# 🍈 MelonRPC
+<p align="center">
+  <img src="public/logo.png" alt="MelonRPC" width="110">
+</p>
+
+<h1 align="center">MelonRPC</h1>
 
 Open-source Solana RPC infrastructure.
 
