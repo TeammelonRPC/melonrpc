@@ -87,7 +87,14 @@ Contributions welcome! Open an issue or PR.
 ## Links
 
 - **Website:** [melonrpc.click](https://melonrpc.click)
-- **X/Twitter:** [@MelonRpc](https://x.com/MelonRpc)
+- **X/Twitter:** [@MelonRPC](https://x.com/MelonRPC)
+- **DexScreener:** [View chart](https://dexscreener.com/solana/af6z2pgl6th3wwpdzlz5hqpaalbfqf41wu1f4y8ayutk)
+
+**Contract Address (CA)**
+
+```
+BuBdKqrMqTLW4zx94XAkTKGFgxu7iY9ZUT2Lp8pApump
+```
 
 ## License
 

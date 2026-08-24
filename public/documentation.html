@@ -155,7 +155,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border-glass);padd
       <a href="/playground">Playground</a>
     </nav>
     <div class="nav-cta">
-      <a href="https://x.com/MelonRpc" target="_blank" class="btn-x" aria-label="X/Twitter">
+      <a href="https://x.com/MelonRPC" target="_blank" class="btn-x" aria-label="X/Twitter">
         <svg viewBox="0 0 24 24" width="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
       <a href="/playground" class="btn-primary">Try RPC <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
@@ -498,7 +498,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border-glass);padd
     <div class="footer-links">
       <a href="/documentation">Docs</a>
       <a href="/playground">Playground</a>
-      <a href="https://x.com/MelonRpc" target="_blank">X</a>
+      <a href="https://x.com/MelonRPC" target="_blank">X</a>
     </div>
     <div class="footer-copy">&copy; 2026 MelonRPC</div>
   </div>
@@ -522,6 +522,66 @@ function updateActive() {
 
 window.addEventListener('scroll', updateActive, { passive: true });
 updateActive();
+</script>
+<!-- MELONRPC: contract address bar + DexScreener nav link -->
+<style>
+.ca-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:1.25rem;z-index:60;display:flex;align-items:center;gap:.625rem;padding:.5rem .5rem .5rem .875rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.15);background:rgba(10,10,14,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.5);font-family:'Inter',system-ui,-apple-system,sans-serif}
+.ca-bar__label{font-size:.6875rem;font-weight:600;letter-spacing:.08em;color:#a0a0a0}
+.ca-bar__addr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;color:#fff;cursor:pointer}
+.ca-bar__btn{padding:.375rem .75rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);color:#a0a0a0;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit}
+.ca-bar__btn:hover{background:rgba(255,255,255,0.08);color:#fff}
+.ca-bar__btn.copied{color:#10b981;border-color:rgba(16,185,129,.5)}
+.dex-fallback{display:flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.15);color:#a0a0a0;transition:all .2s}
+.dex-fallback:hover{color:#fff;background:rgba(255,255,255,0.08)}
+@media(max-width:640px){.ca-bar{bottom:.75rem;padding:.4375rem .4375rem .4375rem .75rem;gap:.5rem}.ca-bar__label{display:none}.ca-bar__addr{font-size:.75rem}}
+</style>
+<div class="ca-bar">
+  <span class="ca-bar__label">CA</span>
+  <span class="ca-bar__addr" id="caAddr"></span>
+  <button class="ca-bar__btn" id="caCopy" type="button">Copy</button>
+</div>
+<script>
+(function(){
+  var CA='BuBdKqrMqTLW4zx94XAkTKGFgxu7iY9ZUT2Lp8pApump';
+  var DEX='https://dexscreener.com/solana/af6z2pgl6th3wwpdzlz5hqpaalbfqf41wu1f4y8ayutk';
+  var X='https://x.com/MelonRPC';
+  var DEXSVG='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 3 5-7"/></svg>';
+
+  /* ---- CA copy pill ---- */
+  var addr=document.getElementById('caAddr'),btn=document.getElementById('caCopy');
+  if(addr&&btn){
+    addr.textContent=CA.slice(0,6)+'\u2026'+CA.slice(-6);
+    addr.title=CA;
+    var done=function(){btn.textContent='Copied';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copy';btn.classList.remove('copied');},1500);};
+    var fallback=function(){var t=document.createElement('textarea');t.value=CA;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(t);};
+    var copy=function(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(CA).then(done)['catch'](fallback);}else{fallback();}};
+    btn.addEventListener('click',copy);addr.addEventListener('click',copy);
+  }
+
+  /* ---- DexScreener link beside the X button ---- */
+  function addDex(){
+    if(document.querySelector('a[data-dex]'))return true;
+    var xs=document.querySelectorAll('a[href*="x.com"],a[href*="twitter.com"]');
+    if(!xs.length)return false;
+    for(var i=0;i<xs.length;i++){
+      var xl=xs[i];
+      xl.href=X;
+      var isIcon=!!xl.querySelector('svg');
+      var a=document.createElement('a');
+      a.href=DEX;a.target='_blank';a.rel='noopener noreferrer';
+      a.setAttribute('data-dex','1');
+      a.setAttribute('aria-label','DexScreener');
+      a.title='DexScreener';
+      if(isIcon){a.className=xl.className||'dex-fallback';if(!xl.className)a.className='dex-fallback';a.innerHTML=DEXSVG;}
+      else{a.className=xl.className;a.textContent='Dex';}
+      xl.parentNode.insertBefore(a,xl);
+    }
+    return true;
+  }
+  if(!addDex()){
+    var n=0,iv=setInterval(function(){if(addDex()||++n>40)clearInterval(iv);},250);
+  }
+})();
 </script>
 </body>
 </html>
