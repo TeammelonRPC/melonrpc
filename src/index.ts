@@ -10,12 +10,10 @@ const manifest: Record<string, string> = JSON.parse(manifestJSON);
 export interface Env {
   UPSTREAM_URL: string;
   UPSTREAM_KEY: string;
-  RATE_LIMIT: KVNamespace;
+  RATE_LIMITER: RateLimit;
   __STATIC_CONTENT: KVNamespace;
 }
 
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_SEC = 1;
 
 const ALLOWED_METHODS = new Set([
   'getAccountInfo','getBalance','getBlock','getBlockHeight',
@@ -42,16 +40,6 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, Solana-Client',
   'Access-Control-Max-Age': '86400',
 };
-
-async function checkRateLimit(ip: string, kv: KVNamespace): Promise<boolean> {
-  const now = Math.floor(Date.now() / 1000);
-  const windowKey = `rl:${ip}:${Math.floor(now / RATE_LIMIT_WINDOW_SEC)}`;
-  const current = await kv.get(windowKey);
-  const count = current ? parseInt(current, 10) : 0;
-  if (count >= RATE_LIMIT_MAX) return false;
-  await kv.put(windowKey, String(count + 1), { expirationTtl: 60 });
-  return true;
-}
 
 function jsonRpcError(id: unknown, code: number, message: string): Response {
   return new Response(
@@ -121,6 +109,8 @@ export default {
           const page = await serveAsset(env, filename);
           if (page) return page;
         }
+        const notFound = await serveAsset(env, '404.html');
+        if (notFound) return new Response(notFound.body, { status: 404, headers: notFound.headers });
         return new Response('Not found', { status: 404 });
       }
 
@@ -131,8 +121,8 @@ export default {
 
       // Rate limiting
       const clientIp = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
-      const allowed = await checkRateLimit(clientIp, env.RATE_LIMIT);
-      if (!allowed) return jsonRpcError(null, -32000, 'Rate limited. Please slow down.');
+      const { success } = await env.RATE_LIMITER.limit({ key: clientIp });
+      if (!success) return jsonRpcError(null, -32000, 'Rate limited. Please slow down.');
 
       // Parse body
       let body: any;

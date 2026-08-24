@@ -2,10 +2,14 @@ name = "melonrpc"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 
-# KV namespace for rate limiting
-[[kv_namespaces]]
-binding = "RATE_LIMIT"
-id = "5e0ccf34ddc24afda02dfa9d7d7b038b"
+# Per-IP rate limiting (Cloudflare native binding)
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 300
+  period = 60
 
 # Static assets
 [site]
