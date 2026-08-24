@@ -402,8 +402,9 @@ function syntaxHighlight(json) {
 
 function highlightCurl(str) {
   return str
-    .replace(/curl/g, '<span class="c-hl">curl</span>')
-    .replace(/"([^"]*)"/g, '<span class="c-acc">"$1"</span>');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"([^"]*)"/g, '<span class="c-acc">"$1"</span>')
+    .replace(/^curl\b/, '<span class="c-hl">curl</span>');
 }
 </script>
 </body>
